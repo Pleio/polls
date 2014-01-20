@@ -167,7 +167,7 @@ function polls_get_page_edit($page_type,$guid = 0) {
 	$params = array(
 		'title' => $title,
 		'content' => $content,
-		'filter' => '',				
+		'filter' => '',
 	);
 
 	$body = elgg_view_layout('content', $params);
@@ -181,7 +181,7 @@ function polls_get_page_edit($page_type,$guid = 0) {
  *
  * @param ElggObject       $poll
  * @return array
- * 
+ *
  * TODO - put choices in sticky form as well
  */
 function polls_prepare_edit_body_vars($poll = NULL) {
@@ -192,6 +192,7 @@ function polls_prepare_edit_body_vars($poll = NULL) {
 		'tags' => NULL,
 		'front_page' => NULL,
 		'access_id' => ACCESS_DEFAULT,
+		'close_date' => null,
 		'guid' => NULL,
 	);
 
@@ -221,9 +222,9 @@ function polls_get_page_list($page_type, $container_guid = NULL) {
 	$user = elgg_get_logged_in_user_entity();
 	$params = array();
 	$options = array(
-		'type'=>'object', 
-		'subtype'=>'poll', 
-		'full_view' => FALSE, 
+		'type'=>'object',
+		'subtype'=>'poll',
+		'full_view' => FALSE,
 		'limit'=>15,
 	);
 	
@@ -297,7 +298,7 @@ function polls_get_page_list($page_type, $container_guid = NULL) {
 		
 		$polls_site_access = elgg_get_plugin_setting('site_access', 'polls');
 		
-		if ((elgg_is_logged_in() && ($polls_site_access != 'admins')) || elgg_is_admin_logged_in()) {		
+		if ((elgg_is_logged_in() && ($polls_site_access != 'admins')) || elgg_is_admin_logged_in()) {
 			elgg_register_menu_item('title', array(
 				'name' => 'add',
 				'href' => "polls/add",
@@ -325,7 +326,7 @@ function polls_get_page_list($page_type, $container_guid = NULL) {
 function polls_get_page_view($guid) {
 	elgg_load_js('elgg.polls');
 	$poll = get_entity($guid);
-	if (elgg_instanceof($poll,'object','poll')) {		
+	if (elgg_instanceof($poll,'object','poll')) {
 		// Set the page owner
 		$page_owner = $poll->getContainerEntity();
 		elgg_set_page_owner_guid($page_owner->guid);
@@ -343,10 +344,10 @@ function polls_get_page_view($guid) {
 			elgg_push_breadcrumb($page_owner->name, "polls/group/{$page_owner->guid}");
 		}
 		elgg_push_breadcrumb($poll->title);
-	} else {			
+	} else {
 		// Display the 'post not found' page instead
-		$title = elgg_echo("polls:notfound");	
-		$content = elgg_view("polls/notfound");	
+		$title = elgg_echo("polls:notfound");
+		$content = elgg_view("polls/notfound");
 		elgg_push_breadcrumb(elgg_echo('item:object:poll'), "polls/all");
 		elgg_push_breadcrumb($title);
 	}
@@ -369,7 +370,7 @@ function polls_get_response_count($valueToCount, $fromArray) {
 			{
 				$count += 1;
 			}
-		}	
+		}
 	}
 	
 	return $count;
@@ -389,7 +390,7 @@ function polls_manage_front_page($poll,$front_page) {
 			$front_page_poll = $polls[0];
 			if ($front_page_poll->guid == $poll->guid) {
 				if (!$front_page) {
-					$front_page_poll->front_page = 0;				
+					$front_page_poll->front_page = 0;
 				}
 			} else {
 				$front_page_poll->front_page = 0;

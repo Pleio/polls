@@ -2,7 +2,7 @@
 
 /**
  * Elgg poll individual post view
- * 
+ *
  * @uses $vars['entity'] Optionally, the poll post to view
  */
 
@@ -26,6 +26,7 @@ if (isset($vars['entity'])) {
 
 	// TODO: support comments off
 	// The "on" status changes for comments, so best to check for !Off
+	$comments_link = '';
 	if ($poll->comments_on != 'Off') {
 		$comments_count = $poll->countComments();
 		//only display if there are commments
@@ -36,22 +37,17 @@ if (isset($vars['entity'])) {
 						'text' => $text,
 						'is_trusted' => true,
 			));
-		} else {
-			$comments_link = '';
 		}
-	} else {
-		$comments_link = '';
 	}
 
 	// do not show the metadata and controls in widget view
-	if (elgg_in_context('widgets')) {
-		$metadata = '';
-	} else {
+	$metadata = '';
+	if (!elgg_in_context('widgets')) {
 		$metadata = elgg_view_menu('entity', array(
-					'entity' => $poll,
-					'handler' => 'polls',
-					'sort_by' => 'priority',
-					'class' => 'elgg-menu-hz',
+			'entity' => $poll,
+			'handler' => 'polls',
+			'sort_by' => 'priority',
+			'class' => 'elgg-menu-hz',
 		));
 	}
 		
@@ -71,9 +67,8 @@ if (isset($vars['entity'])) {
 		echo elgg_view('object/elements/full', array(
 			'summary' => $summary,
 			'icon' => $owner_icon,
+			'body' => elgg_view('polls/body', $vars)
 		));
-		
-		echo elgg_view('polls/body',$vars);
 
 	} else {
 		// brief view

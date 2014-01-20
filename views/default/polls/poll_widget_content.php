@@ -3,42 +3,47 @@ elgg_load_library('elgg:polls');
 
 $poll = elgg_extract('entity', $vars);
 
-if($msg = elgg_extract('msg', $vars)) {
-	echo '<p>'.$msg.'</p>';
+if ($msg = elgg_extract('msg', $vars)) {
+	echo '<div>' . $msg . '</div>';
 }
 
+$results_display = "";
+$voted_text = "";
+$show_text = elgg_echo('polls:show_poll');
 if (elgg_is_logged_in()) {
-	$user_guid = elgg_get_logged_in_user_guid();
-	$can_vote = !polls_check_for_previous_vote($poll, $user_guid);
+	$can_vote = !polls_check_for_previous_vote($poll, elgg_get_logged_in_user_guid());
 	
 	//if user has voted, show the results
 	if (!$can_vote) {
-		$results_display = "block";
-		$poll_display = "none";
-		$show_text = elgg_echo('polls:show_poll');
 		$voted_text = elgg_echo("polls:voted");
 	} else {
-		$results_display = "none";
-		$poll_display = "block";
+		$results_display = "hidden";
 		$show_text = elgg_echo('polls:show_results');
+		
+		// is the poll closed
+		if (isset($poll->close_date) && $poll->close_date < time()) {
+			$can_vote = false;
+			$results_display = "";
+			$voted_text = elgg_echo("polls:vote_ended", array(elgg_view("output/date", array("value" => $poll->close_date))));
+		}
 	}
 } else {
-	$results_display = "block";
-	$poll_display = "none";
-	$show_text = elgg_echo('polls:show_poll');
 	$voted_text = elgg_echo('polls:login');
-	$can_vote = FALSE;
+	$can_vote = false;
 }
-?>
-<div id="poll-post-body-<?php echo $poll->guid; ?>" class="poll_post_body" style="display:<?php echo $results_display ?>;">
-<?php if (!$can_vote) {echo '<p>'.$voted_text.'</p>';}?>
-<?php echo elgg_view('polls/results_for_widget', array('entity' => $poll)); ?>
-</div>
-<?php echo elgg_view_form('polls/vote', array('id'=>'poll-vote-form-'.$poll->guid),array('entity' => $poll,'callback'=>1,'form_display'=>$poll_display));
+
+
+echo "<div id='poll-post-body-" . $poll->getGUID() ."' class='poll_post_body " . $results_display . "'>";
+echo elgg_view('polls/results_for_widget', array('entity' => $poll));
+if (!$can_vote && !empty($voted_text)) {
+	echo "<div>" . $voted_text . "</div>";
+}
+echo "</div>";
+
+if ($can_vote) {
+	echo elgg_view_form('polls/vote', array('id' => 'poll-vote-form-' . $poll->getGUID()), array('entity' => $poll, 'callback' => 1));
 	
-if ($can_vote) {			
-?>
-	<!-- show display toggle -->
-	<p align="center"><a href="javascript:void(0);" rel="<?php echo $poll->guid; ?>" class="poll-show-link"><?php echo $show_text; ?></a></p>
-<?php
+	echo "<div class='center'>";
+	echo elgg_view("output/url", array("href" => "#poll-post-body-" . $poll->getGUID(), "text" => $show_text, "rel" => "toggle", "class" => "poll-show-link"));
+	echo "</div>";
 }
